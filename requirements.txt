@@ -1,0 +1,4 @@
+psutil==5.8.0
+pywin32==300
+pywinauto==0.6.8
+dearpygui==0.6.42
