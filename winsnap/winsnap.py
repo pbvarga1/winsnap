@@ -641,17 +641,24 @@ class MainWindow(UniqueWidget):
                     monitor_profile._app_table.refresh_available_windows()
 
 
-main_window = MainWindow()
+def main():
+    main_window = MainWindow()
+
+    def mouse_click_cb(sender, data):
+        main_window.refresh_windows()
+
+    def startup_cb(sender, data):
+        main_window.load()
+
+    dpg_core.set_mouse_click_callback(mouse_click_cb)
+    dpg_core.set_start_callback(startup_cb)
+    scale = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
+    dpg_core.set_global_font_scale(scale)
+    w, h = dpg_core.get_main_window_size()
+    dpg_core.set_main_window_size(int(w * scale), int(h * scale))
+    dpg_core.set_main_window_title("WinSnap")
+    dpg_core.start_dearpygui(primary_window="Main Window")
 
 
-def mouse_click_cb(sender, data):
-    main_window.refresh_windows()
-
-
-def startup_cb(sender, data):
-    main_window.load()
-
-
-dpg_core.set_mouse_click_callback(mouse_click_cb)
-dpg_core.set_start_callback(startup_cb)
-dpg_core.start_dearpygui(primary_window="Main Window")
+if __name__ == "__main__":
+    main()
