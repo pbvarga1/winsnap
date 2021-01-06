@@ -18,7 +18,8 @@ def format(c):
 @task
 def package(c):
     windows = (Path(__file__) / ".." / "windows").resolve()
-    shutil.rmtree(windows)
+    if windows.exists():
+        shutil.rmtree(windows)
     c.run("briefcase create")
     c.run("briefcase build")
     # The first time it runs it fails but the next time it works. Im pretty sure it's because win32
