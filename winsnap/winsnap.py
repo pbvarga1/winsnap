@@ -194,13 +194,13 @@ def get_windows() -> dict[str, UIAWrapper]:
     """
     windows = {}
     apps = collections.defaultdict(list)
-    pids_to_windows = {}
+    handles_to_windows = {}
     window: UIAWrapper
 
     # For each application with a moveable window, we need to map each application name to a PID.
-    # Multiple pids with the same application name (i.e. two running instances of explorer) is
+    # Multiple handles with the same application name (i.e. two running instances of explorer) is
     # expected. We handle this by first creating a list of windows of the same application name and
-    # then we enumerate the application names so they are unique. We use the pids to keep the
+    # then we enumerate the application names so they are unique. We use the handles to keep the
     # windows sorted in the same order on every call.
 
     for window in Desktop(backend="uia").windows():
@@ -212,18 +212,20 @@ def get_windows() -> dict[str, UIAWrapper]:
             # changes by the state of the application. For example, explorer's window text is based
             # on the current folder - however we want to get explorer.exe
             pid = window.process_id()
-            app = psutil.Process(pid).name()
-            apps[app].append(pid)
-            pids_to_windows[pid] = window
+            app = psutil.Process(window.process_id()).name()
+            apps[app].append(window.handle)
+            handles_to_windows[window.handle] = window
 
-    for app, pids in apps.items():
-        pids = sorted(pids)
-        if len(pids) == 1:
-            windows[app] = pids_to_windows[pids[0]]
+    for app, handles in apps.items():
+        handles = sorted(handles)
+        if len(handles) == 1:
+            windows[app] = handles_to_windows[handles[0]]
         else:
-            for n, pid in enumerate(pids):
+            for n, pid in enumerate(handles):
                 name = f"{app} - {n + 1}"
-                windows[name] = pids_to_windows[pid]
+                windows[name] = handles_to_windows[pid]
+
+    dpg_core.log_debug(f"windows: {windows}")
 
     return windows
 
