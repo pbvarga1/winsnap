@@ -393,14 +393,23 @@ class AppTable(UniqueContainer):
         After an app is selected, other grids should not be able to select it as well.
         """
         dpg_core.log_debug(f"Refreshing available windows for table {self.id}")
-        available_windows = set(self.ACTIVE_WINDOWS) - self._allocated_windows
+        active_windows = set(self.ACTIVE_WINDOWS)
+        available_windows = active_windows - self._allocated_windows
+        grid_mapping = {}
         for row in range(1, self._nrows + 1):
             dpg_core.clear_table(f"{self._id}_{row}_table")
-            windows = sorted(list(available_windows | set(self._grid_mapping[row])))
+
+            selected_active_windows = set(self._grid_mapping[row]) & active_windows
+            grid_mapping[row] = list(selected_active_windows)
+
+            windows = sorted(list(available_windows | selected_active_windows))
             for n, name in enumerate(windows):
                 dpg_core.add_row(f"{self._id}_{row}_table", [name])
-                if name in self._grid_mapping[row]:
+
+                if name in selected_active_windows:
                     dpg_core.set_table_selection(f"{self._id}_{row}_table", n, 0, True)
+
+        self._grid_mapping = grid_mapping
         dpg_core.log_debug(f"Refreshed available windows for table {self.id}")
 
     def set_rows(self, nrows):
