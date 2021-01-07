@@ -1,4 +1,4 @@
 psutil==5.8.0
-pywin32==300
+pywin32==228  # https://github.com/mhammond/pywin32/issues/1614
 pywinauto==0.6.8
 dearpygui==0.6.42
