@@ -11,6 +11,7 @@ import json
 import os
 from pathlib import Path
 import sys
+from time import sleep
 from uuid import uuid4
 
 from dearpygui import core as dpg_core
@@ -852,6 +853,8 @@ class MainWindow(UniqueContainer):
         self._monitors = get_monitors()
         self._save_id = "Save##MainWindow-save"
         self._load_id = "Load##MainWindow-load"
+        self._status_id = "##MainWindow-status"
+        self._status_id_same_line = "##MainWindow-same-line"
 
         # Load the serialized profiles on startup
         if self.PROFILES_PATH.exists():
@@ -889,6 +892,29 @@ class MainWindow(UniqueContainer):
             dpg_core.log_info(f"Create new monitor set: {monitor_set_id}")
         return monitor_set_id
 
+    def show_status(self, text):
+        """Show the status of load and save
+
+        Parameters
+        ----------
+        text : str
+            The status to show
+        """
+
+        dpg_core.set_value(self._status_id, text)
+        dpg_simple.show_item(self._status_id)
+        dpg_simple.show_item(self._status_id_same_line)
+
+        def cb(*args):
+            dpg_simple.hide_item(self._status_id)
+            dpg_simple.hide_item(self._status_id_same_line)
+
+        dpg_core.run_async_function(
+            name=lambda *args: sleep(3),
+            data=None,
+            return_handler=cb,
+        )
+
     def save(self, *args, **kwargs):
         """Save the current layout to the profiles file for the set of monitors"""
         dpg_core.log_info("Saving configuration")
@@ -898,6 +924,7 @@ class MainWindow(UniqueContainer):
         with self.PROFILES_PATH.open("w") as stream:
             json.dump(self._saved_profiles, stream)
         dpg_core.log_info(f"Successfully saved configuration {monitor_set_id}")
+        self.show_status("Save Successful!")
 
     def load(self, *args, **kwargs):
         """Load a the serialized profiles for the current set of monitors"""
@@ -909,6 +936,7 @@ class MainWindow(UniqueContainer):
             dpg_core.log_debug(f"No serialized profile for monitor set ID {monitor_set_id}")
             return
         dpg_core.log_debug(f"Found serialized profile for monitor set ID {monitor_set_id}")
+        self.show_status("Load Successful!")
 
         for label in self._profiles:
             dpg_core.delete_item(label)
@@ -966,6 +994,8 @@ class MainWindow(UniqueContainer):
             dpg_core.add_button(self._save_id, callback=self.save)
             dpg_core.add_same_line()
             dpg_core.add_button(self._load_id, callback=self.load)
+            dpg_core.add_same_line(name=self._status_id_same_line, show=False)
+            dpg_core.add_text(self._status_id, default_value="", show=False)
 
             main_window_tab_bar_ctx = dpg_simple.tab_bar(
                 "##MainWindow-tabbar",
