@@ -395,7 +395,7 @@ class AppTable(UniqueContainer):
         dpg_core.log_debug(f"Refreshing available windows for table {self.id}")
         active_windows = set(self.ACTIVE_WINDOWS)
         available_windows = active_windows - self._allocated_windows
-        grid_mapping = {}
+        grid_mapping = defaultdict(list)
         for row in range(1, self._nrows + 1):
             dpg_core.clear_table(f"{self._id}_{row}_table")
 
