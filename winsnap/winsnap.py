@@ -705,10 +705,10 @@ class MonitorProfile(UniqueContainer):
         dpg_core.log_info(f"Serializing monitor profile: {self.id}")
         serialized_monitor_profile = {
             "xlines": sorted(
-                dpg_core.get_value(xline) / self.monitor.work.height for xline in self._xlines
+                dpg_core.get_value(xline) / self.monitor.work.width for xline in self._xlines
             ),
             "ylines": sorted(
-                dpg_core.get_value(yline) / self.monitor.work.width for yline in self._ylines
+                dpg_core.get_value(yline) / self.monitor.work.height for yline in self._ylines
             ),
         }
         dpg_core.log_info(f"Serialized monitor profile: {self.id}")
@@ -763,7 +763,7 @@ class MonitorProfile(UniqueContainer):
         self._ylines = ylines
 
         self.set_labels()
-        rows, cols = (len(self._xlines) + 1), (len(self._ylines) + 1)
+        rows, cols = (len(self._ylines) + 1), (len(self._xlines) + 1)
         dpg_core.set_value(self._input_id, [rows, cols])
         self._app_table.set_rows(rows * cols)
         dpg_core.log_info(f"Loaded monitor profile {self.id}")
